@@ -77,6 +77,21 @@ export interface KotlinResolversPluginRawConfig extends RawConfig {
    */
   typesType?: 'data' | 'class' | 'interface';
   /**
+   * @default true
+   * @description Control generation of input type transformers (TypeArgs classes).
+   *
+   * @exampleMarkdown
+   * ```yaml
+   * generates:
+   *   src/main/kotlin/my-org/my-app/Types.kt:
+   *     plugins:
+   *       - kotlin
+   *     config:
+   *       withInputTransformers: true
+   * ```
+   */
+  withInputTransformers?: boolean;
+  /**
    * @default false
    * @description Allow you to omit JvmStatic annotation
    *

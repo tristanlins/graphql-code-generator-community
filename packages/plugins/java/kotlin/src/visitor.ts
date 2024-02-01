@@ -41,6 +41,7 @@ export interface KotlinResolverParsedConfig extends ParsedConfig {
   enumValues: EnumValuesMap;
   withTypes: boolean;
   typesType: 'data' | 'class' | 'interface';
+  withInputTransformers: boolean;
   omitJvmStatic: boolean;
 }
 
@@ -63,6 +64,7 @@ export class KotlinResolversVisitor extends BaseVisitor<
       listType: rawConfig.listType || 'Iterable',
       withTypes: rawConfig.withTypes || false,
       typesType: rawConfig.typesType || 'data',
+      withInputTransformers: rawConfig.withInputTransformers ?? true,
       package: rawConfig.package || defaultPackageName,
       scalars: buildScalarsFromConfig(_schema, rawConfig, KOTLIN_SCALARS),
       omitJvmStatic: rawConfig.omitJvmStatic || false,
@@ -310,7 +312,7 @@ ${classMembers.join(',\n')}
   }
 
   FieldDefinition(node: FieldDefinitionNode): FieldDefinitionReturnType {
-    if (node.arguments.length > 0) {
+    if (node.arguments.length > 0 && this.config.withInputTransformers) {
       const inputTransformer = (typeName: string) => {
         const transformerName = `${this.convertName(typeName, {
           useTypesPrefix: true,
