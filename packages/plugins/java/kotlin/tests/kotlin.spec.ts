@@ -337,25 +337,79 @@ describe('Kotlin', () => {
       )`);
     });
 
-    it('Should generate type class per each type if withTypes is true', async () => {
-      const result = await plugin(schema, [], { withTypes: true }, { outputFile: OUTPUT_FILE });
+    describe('Should generate type class per each type if withTypes is true', () => {
+      it('as data class', async () => {
+        const result = await plugin(schema, [], { withTypes: true }, { outputFile: OUTPUT_FILE });
 
-      // language=kotlin
-      expect(result).toBeSimilarStringTo(`data class User(
-        val id: Any,
-        val username: String,
-        val email: String,
-        val name: String?,
-        val friends: Iterable<User>,
-        val hobbies: Iterable<String>
-      )`);
+        // language=kotlin
+        expect(result).toBeSimilarStringTo(`data class User(
+          val id: Any,
+          val username: String,
+          val email: String,
+          val name: String?,
+          val friends: Iterable<User>,
+          val hobbies: Iterable<String>
+        )`);
 
-      // language=kotlin
-      expect(result).toBeSimilarStringTo(`data class Chat(
-        val id: Any,
-        val users: Iterable<User>,
-        val title: String?
-      )`);
+        // language=kotlin
+        expect(result).toBeSimilarStringTo(`data class Chat(
+          val id: Any,
+          val users: Iterable<User>,
+          val title: String?
+        )`);
+      });
+
+      it('as regular class', async () => {
+        const result = await plugin(
+          schema,
+          [],
+          { withTypes: true, typesType: 'class' },
+          { outputFile: OUTPUT_FILE },
+        );
+
+        // language=kotlin
+        expect(result).toBeSimilarStringTo(`class User(
+          val id: Any,
+          val username: String,
+          val email: String,
+          val name: String?,
+          val friends: Iterable<User>,
+          val hobbies: Iterable<String>
+        )`);
+
+        // language=kotlin
+        expect(result).toBeSimilarStringTo(`class Chat(
+          val id: Any,
+          val users: Iterable<User>,
+          val title: String?
+        )`);
+      });
+
+      it('as interface', async () => {
+        const result = await plugin(
+          schema,
+          [],
+          { withTypes: true, typesType: 'interface' },
+          { outputFile: OUTPUT_FILE },
+        );
+
+        // language=kotlin
+        expect(result).toBeSimilarStringTo(`interface User {
+          val id: Any
+          val username: String
+          val email: String
+          val name: String?
+          val friends: Iterable<User>
+          val hobbies: Iterable<String>
+        }`);
+
+        // language=kotlin
+        expect(result).toBeSimilarStringTo(`interface Chat {
+          val id: Any
+          val users: Iterable<User>
+          val title: String?
+        }`);
+      });
     });
   });
 });

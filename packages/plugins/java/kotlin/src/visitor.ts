@@ -40,6 +40,7 @@ export interface KotlinResolverParsedConfig extends ParsedConfig {
   listType: string;
   enumValues: EnumValuesMap;
   withTypes: boolean;
+  typesType: 'data' | 'class' | 'interface';
   omitJvmStatic: boolean;
 }
 
@@ -61,6 +62,7 @@ export class KotlinResolversVisitor extends BaseVisitor<
       enumValues: rawConfig.enumValues || {},
       listType: rawConfig.listType || 'Iterable',
       withTypes: rawConfig.withTypes || false,
+      typesType: rawConfig.typesType || 'data',
       package: rawConfig.package || defaultPackageName,
       scalars: buildScalarsFromConfig(_schema, rawConfig, KOTLIN_SCALARS),
       omitJvmStatic: rawConfig.omitJvmStatic || false,
@@ -245,24 +247,35 @@ ${ctorSet}
     name: string,
     typeValueArray: ReadonlyArray<FieldDefinitionNode>,
   ): string {
-    const classMembers = typeValueArray
-      .map(arg => {
-        if (!arg.type) {
-          return '';
-        }
-        const typeToUse = this.resolveInputFieldType(arg.type);
+    const classMembers = typeValueArray.map(arg => {
+      if (!arg.type) {
+        return '';
+      }
+      const typeToUse = this.resolveInputFieldType(arg.type);
 
-        return indent(
-          `val ${arg.name.value}: ${typeToUse.typeName}${typeToUse.nullable ? '?' : ''}`,
-          2,
-        );
-      })
-      .join(',\n');
+      return indent(
+        `val ${arg.name.value}: ${typeToUse.typeName}${typeToUse.nullable ? '?' : ''}`,
+        2,
+      );
+    });
 
     // language=kotlin
-    return `data class ${name}(
-${classMembers}
+    switch (this.config.typesType) {
+      case 'class':
+        return `class ${name}(
+${classMembers.join(',\n')}
 )`;
+
+      case 'interface':
+        return `interface ${name} {
+${classMembers.join('\n')}
+}`;
+
+      default:
+        return `data class ${name}(
+${classMembers.join(',\n')}
+)`;
+    }
   }
 
   protected initialValue(typeName: string, defaultValue?: ValueNode): string | undefined {

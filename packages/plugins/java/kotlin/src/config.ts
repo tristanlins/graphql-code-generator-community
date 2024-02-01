@@ -58,6 +58,25 @@ export interface KotlinResolversPluginRawConfig extends RawConfig {
    */
   withTypes?: boolean;
   /**
+   * @default data
+   * @description Change the data structure of types.
+   *
+   * - `data` - generate types as *data classes*
+   * - `class` - generate types as regular *class*
+   * - `interface` - generate types as *interfaces*
+   *
+   * @exampleMarkdown
+   * ```yaml
+   * generates:
+   *   src/main/kotlin/my-org/my-app/Types.kt:
+   *     plugins:
+   *       - kotlin
+   *     config:
+   *       typesType: interface
+   * ```
+   */
+  typesType?: 'data' | 'class' | 'interface';
+  /**
    * @default false
    * @description Allow you to omit JvmStatic annotation
    *
